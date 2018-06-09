@@ -7,7 +7,18 @@ const Controller = require('../core/base_controller');
 // redis 的数据类型
 const dataTypeMap = {
   string: {
-    data: async (redis, key) => await redis.get(key),
+    data: async (redis, key, { keyList }) => {
+      if (!keyList) {
+        return await redis.get(key);
+      }
+      const data = [];
+      for (let i = 0; i < keyList.length; i++) {
+        const name = keyList[i];
+        const value = await redis.get(name);
+        data.push({ name, value });
+      }
+      return data;
+    },
     count: () => 1,
   },
   hash: {
@@ -78,15 +89,20 @@ class RedisUIController extends Controller {
 
   async keyData() {
     const ctx = this.ctx;
-    const query = ctx.request.query;
+    const query = ctx.request.body;
 
     const body = this.redisBody();
 
-    if (!_.isObject(query) || !query.kname) {
+    if (!_.isObject(query)) {
       this.errorParams();
       return;
     }
-    if (body.tables.indexOf(query.tname) === -1 || !dataTypeMap[query.ktype]) {
+    if (query.keyList) {
+      query.keyList = _.isArray(query.keyList) && query.keyList.length ? query.keyList : null;
+    }
+    if ((!query.kname && !query.keyList) ||
+      body.tables.indexOf(query.tname) === -1 ||
+      !dataTypeMap[query.ktype]) {
       this.errorMsg('参数值不存在');
       return;
     }
@@ -94,9 +110,10 @@ class RedisUIController extends Controller {
     ctx.body.data = query;
     const func = dataTypeMap[query.ktype];
     const redis = ctx.app.redis.get(query.tname);
-    ctx.body.data.count = await func.count(redis, query.kname);
+    ctx.body.data.count = query.keyList ? query.keyList.length : await func.count(redis, query.kname);
     ctx.body.data.data = await func.data(redis, query.kname, {
       limit: ctx.body.data.count,
+      keyList: query.keyList,
     });
   }
 }

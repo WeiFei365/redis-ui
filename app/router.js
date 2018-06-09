@@ -10,5 +10,5 @@ module.exports = app => {
 
   router.get('/redis_ui/tabs', controller.redisUi.index);
   router.get('/redis_ui/keys', controller.redisUi.listKeys);
-  router.get('/redis_ui/key/data', controller.redisUi.keyData);
+  router.post('/redis_ui/key/data', controller.redisUi.keyData);
 };
