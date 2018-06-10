@@ -41,6 +41,12 @@ $ npm start
 
 ### redis-ui-web相关配置：[转到redis-ui-web](https://github.com/WeiFei365/redis-ui-web)
 
+## TODO List
+
+* 分页查询键列表、键数据
+* 可搜索键名、键数据
+* 权限控制，备注：仅支持修改默认的登陆密码
+
 ## QuickStart
 
 <!-- add docs here for user -->
