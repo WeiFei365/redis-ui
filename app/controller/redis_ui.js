@@ -48,6 +48,7 @@ const dataTypeMap = {
     count: async (redis, key) => await redis.zcard(key),
   },
 };
+dataTypeMap.none = dataTypeMap.string;
 
 class RedisUIController extends Controller {
   async index() {
